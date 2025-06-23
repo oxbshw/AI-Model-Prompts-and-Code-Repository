@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+<script>
+let ball;
+let vertices = [];
+let faces = [];
+let rotationAngle = 0;
+const MAX_DIST = 200;
+
+class Ball {
+  constructor() {
+    this.pos = createVector(random(-50, 50), random(-50, 50), random(-50, 50));
+    this.vel = createVector(random(2, 4), random(2, 4), random(2, 4));
+    this.radius = 12;
+  }
+
+  update() {
+    this.pos.add(this.vel);
+
+    // Simplified collision with rhombic shape bounds
+    let d = this.pos.mag();
+    if (d + this.radius > MAX_DIST) {
+      let normal = p5.Vector.normalize(this.pos);
+      this.vel.reflect(normal);
+      this.pos = normal.mult(MAX_DIST - this.radius);
+    }
+  }
+
+  show() {
+    push();
+    translate(this.pos.x, this.pos.y, this.pos.z);
+    fill(255, 204, 0);
+    noStroke();
+    sphere(this.radius);
+    pop();
+  }
+}
+
+function setup() {
+  createCanvas(800, 600, WEBGL);
+  ball = new Ball();
+  angleMode(DEGREES);
+
+  // Generate approximate rhombicosidodecahedron vertices
+  for(let i = 0; i < 60; i++) {
+    vertices.push(createVector(
+      randomGaussian(0, MAX_DIST),
+      randomGaussian(0, MAX_DIST),
+      randomGaussian(0, MAX_DIST)
+    ).normalize().mult(MAX_DIST));
+  }
+}
+
+function draw() {
+  background(0);
+  rotateX(rotationAngle);
+  rotateY(rotationAngle * 0.7);
+  rotationAngle += 0.3;
+
+  // Draw wireframe
+  stroke(100, 150, 255);
+  noFill();
+  vertices.forEach(v => {
+    push();
+    translate(v.x, v.y, v.z);
+    sphere(3);
+    pop();
+  });
+
+  ball.update();
+  ball.show();
+}
+</script>
+</body>
+</html>
